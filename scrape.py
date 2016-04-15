@@ -58,7 +58,7 @@ def parse_page(data):
 
                 country_name = urllib.unquote(country_name_encoded)
 
-                flag_dict[country_name] = country_url
+                flag_dict[country_name] = "https:%s" % country_url
 
     return flag_dict
 
