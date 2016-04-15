@@ -3,55 +3,72 @@ from lxml import html
 import requests
 import re
 import urllib
+import json
 
-live = True
+LIVE = True
 
-if live:
-    print "Requesting Live copy"
-    page = requests.get('https://en.wikipedia.org/wiki/Gallery_of_sovereign_state_flags')  # noqa
-    data = page.content
-else:
-    print "Using cached copy"
-    f = open('wiki-flags.html')
-    data = f.read()
-    f.close()
 
-tree = html.fromstring(data)
+def get_page():
+    # Grab the page, either from wikipedia, or from
+    # the cached local copy. Returns a string of the
+    # page contents
+    if LIVE:
+        page = requests.get('https://en.wikipedia.org/wiki/Gallery_of_sovereign_state_flags')  # noqa
+        data = page.content
+    else:
+        f = open('wiki-flags.html')
+        data = f.read()
+        f.close()
 
-td_list = tree.xpath('//table/tr/td')
+    return data
 
-count = 0
 
-for td in td_list:
-    link_list = td.xpath('a')
+def parse_page(data):
+    # Passed a string of the page contents, attempts to build
+    # a dictionary of 'contry name' : 'url' where the url is
+    # the url to the full SVG of the flag
+    tree = html.fromstring(data)
 
-    country_name = None
-    country_url = None
+    td_list = tree.xpath('//table/tr/td')
 
-    for link in link_list:
-        a_class = link.attrib.get('class')
-        a_title = link.attrib.get('title')
-        a_href = link.attrib.get('href')
-        a_text = link.text
+    flag_dict = {}
 
-        if a_class == 'image':
-            # Bit of a hack, I'm only interested in the
-            # first image in these cells
-            thumb_src = link.xpath('img')[0].attrib['src']
-            t = thumb_src.replace('/thumb', '')
+    for td in td_list:
+        link_list = td.xpath('a')
 
-            regex = '^(.*)\/.*.png$'
-            url_matches = re.search(regex, t)
-            country_url = url_matches.group(1)
+        country_name = None
+        country_url = None
 
-            name_re = '^.*Flag_of_(.*).svg'
-            name_matches = re.search(name_re, country_url)
-            country_name_encoded = name_matches.group(1)
+        for link in link_list:
+            a_class = link.attrib.get('class')
 
-            country_name = urllib.unquote(country_name_encoded)
+            if a_class == 'image':
+                # Bit of a hack, I'm only interested in the
+                # first image in these cells
+                thumb_src = link.xpath('img')[0].attrib['src']
+                t = thumb_src.replace('/thumb', '')
 
-            print "Country:%s URL:https:%s" % (country_name, country_url)
+                regex = '^(.*)\/.*.png$'
+                url_matches = re.search(regex, t)
+                country_url = url_matches.group(1)
 
-            count = count + 1
+                name_re = '^.*Flag_of_(.*).svg'
+                name_matches = re.search(name_re, country_url)
+                country_name_encoded = name_matches.group(1)
 
-print "Found %d flags" % count
+                country_name = urllib.unquote(country_name_encoded)
+
+                flag_dict[country_name] = country_url
+
+    return flag_dict
+
+
+def main():
+    flags = parse_page(get_page())
+    # Just printing this dict as json for now, other uses
+    # will be catered for in the future.
+    print json.dumps(flags, sort_keys=True, indent=4, separators=(',', ': '))
+
+
+if __name__ == "__main__":
+    main()
