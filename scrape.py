@@ -31,7 +31,7 @@ def parse_page(data):
 
     td_list = tree.xpath('//table/tr/td')
 
-    flag_dict = {}
+    flag_list = []
 
     for td in td_list:
         link_list = td.xpath('a')
@@ -40,6 +40,9 @@ def parse_page(data):
         country_url = None
 
         for link in link_list:
+
+            flag_dict = {}
+
             a_class = link.attrib.get('class')
 
             if a_class == 'image':
@@ -57,10 +60,16 @@ def parse_page(data):
                 country_name_encoded = name_matches.group(1)
 
                 country_name = urllib.unquote(country_name_encoded)
+                country_name = country_name.replace("_", " ")
+                the_re = '^the'
+                country_name = re.sub(the_re, 'The', country_name)
 
-                flag_dict[country_name] = "https:%s" % country_url
+                flag_dict['name'] = country_name
+                flag_dict['url'] = "https:%s" % country_url
 
-    return flag_dict
+                flag_list.append(flag_dict)
+
+    return flag_list
 
 
 def main():
