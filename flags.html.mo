@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>Flags of the World</title>
     <style>
+    @media print {
+      div{
+        page-break-inside: avoid;
+      }
+    }
     .flag_holder {
         border: 2px solid black;
         height: 200px;
