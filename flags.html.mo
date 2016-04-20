@@ -11,11 +11,11 @@
     }
     .flag_holder {
         border: 2px solid black;
-        height: 200px;
-        padding: 10px;
+        padding: 5px;
         float: left;
         margin: 10px;
-
+        width: 200px;
+        height: 200px;
     }
     .flag_svg {
         width: 200px;
@@ -23,14 +23,25 @@
     }
     .flag_name {
         font-size: 16px;
-        width: 200px;
         text-align: center;
-        font-family: Helvetica, Arial, Sans-Serif;
+        font-family: Helvetica, Sans-Serif;
         word-wrap: break-word;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        width: 95%;
+    }
+    p {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+    h1 {
+        font-family: Helvetica, Sans-Serif;
+        text-align: center;
     }
     </style>
   </head>
   <body>
+      <h1>Sovereign State Flags</h1>
   {{#flag_list}}
     <div class="flag_holder">
        <img class="flag_svg" src="{{url}}">
